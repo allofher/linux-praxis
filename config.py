@@ -27,7 +27,6 @@
 from libqtile import bar, layout, widget
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
-from libqtile.utils import guess_terminal
 
 mod = "mod4"
 terminal = "alacritty"
@@ -116,7 +115,7 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font="sans",
+    font="Caskaydia Cove Nerd Font Complete Mono Regular",
     fontsize=12,
     padding=3,
 )
