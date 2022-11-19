@@ -76,13 +76,30 @@ keys = [
 
 # groups = [Group(i) for i in "123456789"]
 groups = [
- 	Group("1"),
-	Group("2"),
-	Group("3"),
-	ScratchPad("scratchpad", [DropDown("term", "alacritty")])
+ 	Group(""), # background processes and system management
+	Group(""), # coding / productivity
+	Group(""), # regular day to day (music/ web)
+    Group(""), # games
 ]
+group_hotkeys="1234"
 
-dgroups_key_binder = simple_key_binder(mod)
+for g, k in zip(groups, group_hotkeys)
+    keys.extend([
+        Key(
+            [mod],
+            k,
+            lazy.group[g.name].toscreen(),
+            desc=f"Switch to group {g.name}"
+        ),
+        Key(
+            [mod, "shift"],
+            k,
+            lazy.window.togroup(g.name, switch_group=True),
+            desc=f"Switch to group {g.name} and move current window"
+        )
+        ])
+
+groups.append(ScratchPad("scratchpad", [DropDown("term", "alacritty")]))
 keys.extend([Key([mod], "p", lazy.group['scratchpad'].dropdown_toggle('term'))])
 
 layouts = [
