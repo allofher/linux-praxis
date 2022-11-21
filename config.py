@@ -24,8 +24,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from libqtile import bar, layout, widget
-from libqtile.dgroups import simple_key_binder
+import os
+import subprocess
+
+from libqtile import bar, layout, widget, hook
 from libqtile.config import Click, Drag, Group, Key, Match, Screen, ScratchPad, DropDown
 from libqtile.lazy import lazy
 
@@ -83,7 +85,7 @@ groups = [
 ]
 group_hotkeys="1234"
 
-for g, k in zip(groups, group_hotkeys)
+for g, k in zip(groups, group_hotkeys):
     keys.extend([
         Key(
             [mod],
@@ -120,7 +122,7 @@ layouts = [
 
 widget_defaults = dict(
     font="Caskaydia Cove Nerd Font Complete Mono Regular",
-    fontsize=14,
+    fontsize=20,
     padding=3,
 )
 extension_defaults = widget_defaults.copy()
@@ -129,24 +131,22 @@ screens = [
     Screen(
         top=bar.Bar(
             [
-                widget.CurrentLayout(),
-                widget.GroupBox(),
-                widget.Prompt(),
+                widget.GroupBox(
+                    highlight_method="block",
+                    disable_drag=True,
+                    rounded=True,
+                    padding_x=5),
                 widget.WindowName(),
-                widget.Chord(
-                    chords_colors={
-                        "launch": ("#ff0000", "#ffffff"),
-                    },
-                    name_transform=lambda name: name.upper(),
-                ),
-                # NB Systray is incompatible with Wayland, consider using StatusNotifier instead
-                # widget.StatusNotifier(),
                 widget.Systray(),
-                widget.Backlight(),
+		        widget.CheckUpdates(
+                    distro='Arch',
+                    no_update_string="",
+                    display_format=""),
                 widget.Clock(format="%Y-%m-%d %a %I:%M %p"),
             ],
             24,
-            # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
+            margin=5,
+            border_width=[10, 0, 10, 0],  # Draw top and bottom borders
             # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
         ),
     ),
@@ -176,6 +176,13 @@ floating_layout = layout.Floating(
         Match(title="pinentry"),  # GPG key password entry
     ]
 )
+
+@hook.subscribe.startup_once
+def autostart():
+    home = os.path.expanduser('~/scripts/qtile_startup.sh')
+    subprocess.Popen([home])
+
+
 auto_fullscreen = False
 focus_on_window_activation = "smart"
 reconfigure_screens = True
