@@ -129,7 +129,7 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font="TerminessTTF Nerd Font Mono"
+    font="FiraCode Nerd Font Mono"
 )
 
 extension_defaults = widget_defaults.copy()
