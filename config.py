@@ -34,6 +34,14 @@ from libqtile.lazy import lazy
 mod = "mod4"
 terminal = "alacritty"
 
+colours = {
+    "persian": "#339989",
+    "space": "#1F363D",
+    "tea": "#D0EFB1",
+    "sugar": "#B4654A",
+    "rajah": "#F6AF65"
+}
+
 keys = [
     # A list of available commands that can be bound to keys can be found
     # at https://docs.qtile.org/en/latest/manual/config/lazy.html
@@ -77,12 +85,7 @@ keys = [
 ]
 
 # groups = [Group(i) for i in "123456789"]
-groups = [
- 	Group(""), # background processes and system management
-	Group(""), # coding / productivity
-	Group(""), # regular day to day (music/ web)
-    Group(""), # games
-]
+groups = [Group(i) for i in ["", "", "", ""]]
 group_hotkeys="1234"
 
 for g, k in zip(groups, group_hotkeys):
@@ -111,7 +114,12 @@ layouts = [
     # layout.Stack(num_stacks=2),
     # layout.Bsp(),
     # layout.Matrix(),
-    layout.MonadTall(),
+    layout.MonadTall(
+        margin=5,
+        border_width=2,
+        border_focus=colours["rajah"],
+        border_normal=colours["sugar"]
+    ),
     # layout.MonadWide(),
     # layout.RatioTile(),
     # layout.Tile(),
@@ -121,32 +129,83 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font="Caskaydia Cove Nerd Font Complete Mono Regular",
-    fontsize=20,
-    padding=3,
+    font="TerminessTTF Nerd Font Mono"
 )
+
 extension_defaults = widget_defaults.copy()
 
 screens = [
     Screen(
         top=bar.Bar(
             [
+                widget.TextBox(
+                    text="",
+                    padding=0,
+                    fontsize=40,
+                    foreground=colours["persian"],
+                    background="#00000000",
+                    ),
                 widget.GroupBox(
-                    highlight_method="block",
+                    highlight_method="line",
+                    fontsize=30,
+                    background=colours["persian"],
+                    this_current_screen_border=colours["tea"],
+                    highlight_color=[colours["persian"], colours["persian"]],
+                    inactive="#000000",
+                    active="#ffffff",
+                    center_aligned=True,
                     disable_drag=True,
                     rounded=True,
-                    padding_x=5),
-                widget.WindowName(),
-                widget.Systray(),
-		        widget.CheckUpdates(
+                    urgent_alert_method="line",
+                    urgent_border=colours["sugar"]
+                    ),
+                widget.TextBox(
+                    text="",
+                    padding=0,
+                    fontsize=40,
+                    foreground=colours["persian"],
+                    background=colours["space"],
+                    ),
+                widget.Spacer(background=colours["space"], length=10),
+                widget.WindowName(background=colours["space"]),
+                widget.TextBox(
+                    text="",
+                    padding=0,
+                    fontsize=40,
+                    foreground=colours["persian"],
+                    background=colours["space"],
+                ),
+                widget.Systray(
+                    background=colours["persian"]),
+                widget.Spacer(length=5, background=colours["persian"]),
+                widget.CheckUpdates(
                     distro='Arch',
                     no_update_string="",
-                    display_format=""),
-                widget.Clock(format="%Y-%m-%d %a %I:%M %p"),
+                    display_format="",
+                    background=colours["persian"]),
+                widget.TextBox(
+                    text="",
+                    fontsize=30,
+                    padding=5,
+                    background=colours["persian"],
+                    foreground="#ffffff"
+                ),
+                widget.Clock(
+                    padding=0,
+                    format="%H:%M %a %Y-%m-%d",
+                    background=colours["persian"]
+                ),
+                widget.TextBox(
+                    text="",
+                    padding=0,
+                    fontsize=40,
+                    foreground=colours["persian"],
+                    background="#00000000",
+                )
             ],
             24,
-            margin=5,
-            border_width=[10, 0, 10, 0],  # Draw top and bottom borders
+            #border_width=[0, 0, 10, 0],  # Draw top and bottom borders
+            background=colours["space"]
             # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
         ),
     ),
