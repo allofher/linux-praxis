@@ -1,0 +1,102 @@
+This is a series of reminders and steps for a minimal arch install with just our needed packages.
+
+. USB loaded with the latest arch :)
+
+. Ensure UEFI > "ls /sys/firmware/efi/efivars"
+
+. Setup wireless/internet (iwctl)
+
+. check system time > "timedatectl status"
+
+. Update packages
+
+. Format computer harddrive from USB
+  . fdisk /dev/x
+  . create gpt table
+  . create boot partition (~550M) - change filesystem type to EFI system
+  . create root partition (rest) - keep filesystem ext4
+
+. make filesystems with mkfs
+  . for boot > "mkfs.fat -F32 /dev/sdx#'
+  . for rest > "mkfs.ext4 /dev/sdx#"
+
+. mount the 'rest' partition > "mount /dev/sdx# /mnt"
+
+. bootstrap packages > "pacstrap -K /mnt base linux linux-firmware"
+
+. generate fstab > "genfstab -U /mnt >> /mnt/etc/fstab"
+
+. arch-chroot /mnt
+
+. set timezone > "ln -sf /usr/share/zoneinfo/Region/City /etc/localtime" followed by "hwclock --systohc"
+
+. update pacman
+
+. install nano base-devel openssh linux-headers
+
+. set locale in /etc/local.gen followed by "locale-gen"
+
+. setup hostname
+  . nano etc/hostname - create file and type just the hostname
+  . nano etc/hosts
+    . 127.0.0.1   localhost
+    . ::1         localhost
+    . 127.0.1.1   $our_hostname.localdomain   $our_hostname
+
+. setup users
+  . passwd, set password
+  . useradd -m name
+  . passwd name
+  . usermod -aG wheel,audio,video,storage name
+  . EDITOR=nano visudo uncomment wheel
+
+. install grub
+  . pacman -S grub efibootmgr dosfstools os-prober mtools
+  . mkdir /boot/EFI
+  . mount /dev/sdx# /boot/EFI
+  . grub-install --target=x86_64-efi --bootloader-id=grub_uefi --recheck
+  . grub-mkconfig -o /boot/grub/grub.cfg
+
+. enable systemctl stuff
+  . systemctl enable sshd
+  . systemctl enable NetworkManager
+
+. time to reboot!
+  . exit
+  . umount -a, or umount -R /mnt
+  . shutdown
+
+. setup swap
+  . su
+  . cd /root
+  . dd if=/dev/zero of=/swapfile bs=1M count=2048 status=progress
+  . chmod 600 /swapfile
+  . mkswap /swapfile
+  . cp /etc/fstab /etc/fstab.bak
+  . echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
+  . free -m
+  . mount -a
+  . swapon -a
+
+. logout of root
+
+. double check timezone > "timedatectl"
+
+. make sure pacman is good
+  . update
+  . w/ fast internet > "reflector --country CA --latest 5 --sort rate --save /etc/pacman.d/mirrorlist"
+  . edit conf for parallel downloads (/etc/pacman.conf)
+
+. install core things
+  . git
+  . intel-ucode or amd-ucode
+  . nvidia or mesa
+  . xorg-server
+
+. setup our stuff!
+  . git clone https://github.com/allofher/linux-praxis.git
+  . pacman -S --needed - < setup_packages.tx
+  . place config files in appropriate spots in home directory
+  . systemctl enable emacs (may need "--user emacs" instead)
+
+. reboot for safety and next startup we should be able to 'startx' into our setup!
