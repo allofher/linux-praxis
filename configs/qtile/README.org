@@ -1,8 +1,6 @@
 #+TITLE: Qtile Config
 #+PROPERTY: header-args :tangle "~/linux-praxis/configs/qtile/config.py"
 
-* QTILE Config
-
 This is a stripped down minimal qtile config with a small selection of colours and ricing to help focus. Each heading here contains source blocks that combine to make our ~/.config/qtile.py file
 
 * Imports and global variables
@@ -68,7 +66,12 @@ keys = [
 Here we create our workspace groupings which help semantically group programs at startup.
 
 #+BEGIN_SRC python
-groups = [Group(i) for i in ["", "", "", ""]]
+groups = [
+    Group(name="1", label=""),
+    Group(name="2", label=""),
+    Group(name="3", label=""),
+    Group(name="4", label="")
+]
 group_hotkeys="1234"
 
 for g, k in zip(groups, group_hotkeys):

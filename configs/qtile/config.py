@@ -44,7 +44,12 @@ keys = [
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
 ]
 
-groups = [Group(i) for i in ["", "", "", ""]]
+groups = [
+    Group(name="1", label=""),
+    Group(name="2", label=""),
+    Group(name="3", label=""),
+    Group(name="4", label="")
+]
 group_hotkeys="1234"
 
 for g, k in zip(groups, group_hotkeys):

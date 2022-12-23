@@ -5,7 +5,6 @@ bluez
 bluez-utils
 discord-ptb
 emacs
-fd
 firefox
 htop
 libfido2
@@ -17,7 +16,6 @@ pipewire-alsa
 pipewire-pulse
 python-pip
 qtile
-ripgrep
 redshift
 rofi
 tidal-hifi-bin
