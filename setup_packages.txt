@@ -5,10 +5,10 @@ bluez
 bluez-utils
 discord-ptb
 emacs
+fd
 firefox
 htop
 libfido2
-nerd-fonts-complete
 network-manager-applet
 networkmanager
 openssh
@@ -17,11 +17,11 @@ pipewire-alsa
 pipewire-pulse
 python-pip
 qtile
+ripgrep
 redshift
 rofi
 tidal-hifi-bin
 ttf-liberation
+ttf-linux-libertine
 vial-appimage
 yay
-fd
-ripgrep

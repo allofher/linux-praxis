@@ -1,3 +1,15 @@
+#+TITLE: Qtile Config
+#+PROPERTY: header-args :tangle "~/linux-praxis/configs/qtile/config.py"
+
+* QTILE Config
+
+This is a stripped down minimal qtile config with a small selection of colours and ricing to help focus. Each heading here contains source blocks that combine to make our ~/.config/qtile.py file
+
+* Imports and global variables
+
+Here we import the needed functions from the broader qtile libraries. Additionally we set a few colours for later theming and leader key.
+
+#+BEGIN_SRC python
 import os
 import subprocess
 
@@ -14,7 +26,13 @@ colours = {
     "sugar": "#B4654A",
     "rajah": "#F6AF65"
 }
+#+END_SRC
 
+* Keybindings
+
+This is a static list of keybindings which allow the movement of windows around the tiled workspaces. There are also some small additions to spawn certain programs; namely, rofi and alacritty.
+
+#+BEGIN_SRC python
 keys = [
     Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
     Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
@@ -43,7 +61,13 @@ keys = [
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
 ]
+#+END_SRC
 
+* Groups (i.e Workspaces)
+
+Here we create our workspace groupings which help semantically group programs at startup.
+
+#+BEGIN_SRC python
 groups = [Group(i) for i in ["", "", "", ""]]
 group_hotkeys="1234"
 
@@ -65,7 +89,13 @@ for g, k in zip(groups, group_hotkeys):
 
 groups.append(ScratchPad("scratchpad", [DropDown("term", "alacritty")]))
 keys.extend([Key([mod], "p", lazy.group['scratchpad'].dropdown_toggle('term'))])
+#+END_SRC
 
+* Layouts
+
+The layouts list allows you to define specific tiling workflows per 'group'. i.e. Group 1 could be traditional floating window management while group 3 is a fibbonacci tiling pattern. Here we also define our font to be used in the system UI.
+
+#+BEGIN_SRC python
 layouts = [
     #layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=4),
     #layout.Max(),
@@ -92,7 +122,13 @@ widget_defaults = dict(
 )
 
 extension_defaults = widget_defaults.copy()
+#+END_SRC
 
+* Screens
+
+This section is called 'screens' as it technically allows you to customize the appearance 'per screen'. On a single monitor setup, it is a wrapping around the main purpose: to customize the 'bar'.
+
+#+BEGIN_SRC python
 screens = [
     Screen(
         top=bar.Bar(
@@ -167,12 +203,24 @@ screens = [
         ),
     ),
 ]
+#+END_SRC
 
+* Autostart
+
+We do not autostart programs from directly within the source code. Instead we elect to run a separate bash script for ease of maintenance.
+
+#+BEGIN_SRC python
 @hook.subscribe.startup_once
 def autostart():
     home = os.path.expanduser('~/scripts/qtile_startup.sh')
     subprocess.Popen([home])
+#+END_SRC
 
+* Miscellaneous functionality
+
+Everything in this section came stock from the default config and helps handle some non keyboard interaction and edge case windows. Note the "float_rules" list composed of "Match" functions. This functionality can be extended to to make certain apps always spawn in certain groups.
+
+#+BEGIN_SRC python
 # Drag floating layouts.
 mouse = [
     Drag([mod], "Button1", lazy.window.set_position_floating(), start=lazy.window.get_position()),
@@ -188,7 +236,7 @@ cursor_warp = False
 floating_layout = layout.Floating(
     float_rules=[
         # Run the utility of `xprop` to see the wm class and name of an X client.
-        *layout.Floating.default_float_rules,
+        ,*layout.Floating.default_float_rules,
         Match(wm_class="confirmreset"),  # gitk
         Match(wm_class="makebranch"),  # gitk
         Match(wm_class="maketag"),  # gitk
@@ -204,3 +252,4 @@ reconfigure_screens = True
 auto_minimize = True
 wl_input_rules = True
 wmname = "LG3D"
+#+END_SRC
