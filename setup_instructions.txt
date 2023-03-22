@@ -7,8 +7,10 @@ This is a series of reminders and steps for a minimal arch install with just our
 . Setup wireless/internet (iwctl)
 
 . check system time > "timedatectl status"
+  . if time is wrong timedatectl has a 'set-timezone' option and then you can run "timedatectl set-ntp true"
 
 . Update packages
+  . Sometimes I've found the "arch-keyring" is missing from the live disk if the time didnt sync on startup
 
 . Format computer harddrive from USB
   . fdisk /dev/x
@@ -32,7 +34,7 @@ This is a series of reminders and steps for a minimal arch install with just our
 
 . update pacman
 
-. install nano base-devel openssh linux-headers
+. install nano base-devel openssh linux-headers networkmanager
 
 . set locale in /etc/local.gen followed by "locale-gen"
 
