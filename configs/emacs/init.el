@@ -15,17 +15,12 @@
 
 (setq-default cursor-type 'bar)
 
-
-;change startup page from scratch to self todo
-(let ((filename "~/todo.org"))
-  (when (file-exists-p filename)
-    (setq initial-buffer-choice filename)))
-
 ;;
 ;;package management setup
 
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+			 ("melpa-stable" . "https://stable.melpa.org/packages/")
 			 ("org" . "https://orgmode.org/elpa/")
 			 ("elpa" . "https://elpa.gnu.org/packages/")))
 (package-initialize)
@@ -39,8 +34,18 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
+(add-to-list 'load-path (expand-file-name "lib/lsp-mode" user-emacs-directory))
+(add-to-list 'load-path (expand-file-name "lib/lsp-mode/clients" user-emacs-directory))
+(setenv "PATH" (concat (getenv "PATH") ":/home/oliver/.local/bin"))
+(setq exec-path (append exec-path '("/home/oliver/.local/bin")))
 ;;
 ;;packages
+
+;icons for rendering compatability across packages
+(use-package all-the-icons)
+
+;git
+(use-package magit)
 
 ;autocomplete info and text search in interaction bar
 (use-package ivy
@@ -127,6 +132,51 @@
 "b" '(hydra-buffers/body :which-key "Manage Buffers")
 "s" '(hydra-scale-text/body :which-key "Scale Text Size"))
 
+;python dev setup
+;lsp mode setup and packages -- for language server while doing development
+(use-package markdown-mode
+  :ensure t
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown")
+  :bind (:map markdown-mode-map
+              ("C-c C-e" . markdown-do)))
+
+(use-package evil-nerd-commenter
+  :bind ("M-/" . evilnc-comment-or-uncomment-lines)) 
+
+(defun lsp-mode-setup ()
+  (setq lsp-header-line-breadcrumb-segments '(path-up-to-project file symbols))
+  (lsp-headerline-breadcrumb-mode))
+
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :hook ((lsp-mode . lsp-enable-which-key-integration)
+	 (lsp-mode . lsp-mode-setup)))
+
+(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+
+(use-package company
+  :after lsp-mode
+  :hook (lsp-mode . company-mode)
+  :bind (:map company-active-map
+         ("<tab>" . company-complete-selection))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+
+;using lsp mode when python loads
+(use-package python-mode
+  :hook (python-mode . lsp-deferred))
+
+(use-package pyvenv
+  :config
+  (pyvenv-mode 1))
+
 ;beginning of preparation packages and functions for org-mode
 ;general functionality
 
@@ -195,7 +245,7 @@
   (setq org-roam-ui-sync-theme t
 	org-roam-ui-follow t
 	org-roam-ui-update-on-save t
-	org-roam-ui-open-on-start t))
+	org-roam-ui-open-on-start nil))
 
 ;Actual Org!
 (use-package org
@@ -207,10 +257,6 @@
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
   (setq org-support-shift-select 'always)
   (org-font-setup))
-
-;python coding stuff
-;(use-package python-mode
-;  :ensure nil)
 
 ;makes emacs look pretty
 (use-package doom-themes
