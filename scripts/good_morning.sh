@@ -7,3 +7,4 @@ qtile run-cmd -g 2 firefox &
 qtile run-cmd -g 3 tidal-hifi &
 qtile run-cmd -g 3 discord-ptb &
 qtile run-cmd -g 4 alacritty -e "htop" &
+qtile run-cmd -g 4 thunderbird &

@@ -44,6 +44,7 @@ keys = [
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
 ]
 
+# groups = [Group(i) for i in ["", "", "", ""]]
 groups = [
     Group(name="1", label=""),
     Group(name="2", label=""),
@@ -93,7 +94,7 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font="Linux Liberation"
+    font="Liberation Mono"
 )
 
 extension_defaults = widget_defaults.copy()
@@ -111,7 +112,7 @@ screens = [
                     ),
                 widget.GroupBox(
                     highlight_method="line",
-                    fontsize=30,
+                    fontsize=14,
                     background=colours["persian"],
                     this_current_screen_border=colours["tea"],
                     highlight_color=[colours["persian"], colours["persian"]],
@@ -131,7 +132,7 @@ screens = [
                     background=colours["space"],
                     ),
                 widget.Spacer(background=colours["space"], length=10),
-                widget.WindowName(background=colours["space"]),
+                widget.WindowName(background=colours["space"], fontsize=14),
                 widget.TextBox(
                     text="",
                     padding=0,
@@ -149,13 +150,14 @@ screens = [
                     background=colours["persian"]),
                 widget.TextBox(
                     text="",
-                    fontsize=30,
+                    fontsize=14,
                     padding=5,
                     background=colours["persian"],
                     foreground="#ffffff"
                 ),
                 widget.Clock(
                     padding=0,
+                    fontsize=14,
                     format="%H:%M %a %Y-%m-%d",
                     background=colours["persian"]
                 ),

@@ -12,8 +12,10 @@
 (column-number-mode)
 (global-display-line-numbers-mode 1)
 (global-visual-line-mode 1) 
-
+(global-unset-key (kbd "C-z"))
+(global-unset-key (kbd "C-x C-z"))
 (setq-default cursor-type 'bar)
+(global-auto-revert-mode 1)
 
 ;;
 ;;package management setup
@@ -37,7 +39,10 @@
 (add-to-list 'load-path (expand-file-name "lib/lsp-mode" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "lib/lsp-mode/clients" user-emacs-directory))
 (setenv "PATH" (concat (getenv "PATH") ":/home/oliver/.local/bin"))
+(setenv "PATH" (concat (getenv "PATH") ":/home/oliver/go/bin"))
 (setq exec-path (append exec-path '("/home/oliver/.local/bin")))
+(setq exec-path (append exec-path '("/home/oliver/go/bin")))
+
 ;;
 ;;packages
 
@@ -46,6 +51,11 @@
 
 ;git
 (use-package magit)
+
+;tree-sitter
+(use-package tree-sitter)
+(use-package tree-sitter-langs)
+(global-tree-sitter-mode)
 
 ;autocomplete info and text search in interaction bar
 (use-package ivy
@@ -124,15 +134,7 @@
   ("e" text-scale-decrease "out")
   ("f" nil "finished" :exit t))
 
-;binds custom functions to the general hotkey management
-(my-leader
-"" '(:ignore t :which-key "Custom leader key with SPC")
-"." 'counsel-find-file
-"r" 'counsel-projectile-rg
-"b" '(hydra-buffers/body :which-key "Manage Buffers")
-"s" '(hydra-scale-text/body :which-key "Scale Text Size"))
-
-;python dev setup
+;dev setup
 ;lsp mode setup and packages -- for language server while doing development
 (use-package markdown-mode
   :ensure t
@@ -157,6 +159,8 @@
 
 (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
 
+(use-package golsp)
+
 (use-package company
   :after lsp-mode
   :hook (lsp-mode . company-mode)
@@ -177,8 +181,19 @@
   :config
   (pyvenv-mode 1))
 
+(use-package go-mode)
+(add-hook 'go-mode-hook 'lsp-deferred)
+
 ;beginning of preparation packages and functions for org-mode
 ;general functionality
+(defface my-org-custom-highlight-face
+  '((t :background "#B54A65")) ; Replace #B54A65 with your desired hexadecimal color
+  "Custom face for highlighting keyphrases in Org mode."
+  :group 'my-org-faces)
+
+(defun org-custom-html-highlight ()
+  (interactive)
+  (hi-lock-set-pattern "\\(\\?note\\)\\|\\(\\?end\\)\\|\\(\\?highb\\)\\|\\(\\?high\\)" 'my-org-custom-highlight-face))
 
 (defun org-mode-visual-fill ()
   (setq visual-fill-column-width 100
@@ -195,6 +210,8 @@
 
 (defun org-mode-setup ()
   (org-indent-mode)
+  (hi-lock-mode 1)
+  (org-custom-html-highlight)
   (variable-pitch-mode 1)
   (display-line-numbers-mode 0)
   (visual-line-mode 1)
@@ -258,6 +275,52 @@
   (setq org-support-shift-select 'always)
   (org-font-setup))
 
+;custom functions for jinja template friendly html exports from org documents
+;replace org text 'tags' to html divs
+(defun my-replace-custom-tags-in-html-file (file-path)
+  (with-temp-buffer
+    (insert-file-contents file-path)
+    (goto-char (point-min))
+    (while (re-search-forward "\\(\\?note\\)\\|\\(\\?end\\)\\|\\(\\?highb\\)\\|\\(\\?high\\)" nil t)
+      (cond
+       ((match-string 1) ; ?NOTE
+        (replace-match "<span class='margin-note'>"))
+       ((match-string 2) ; ?END
+        (replace-match "</span>"))
+       ((match-string 3) ; ?HIGHB
+        (replace-match "<span class='highlight_b'>"))
+       ((match-string 4) ; ?HIGH
+        (replace-match "<span class='highlight'>"))))
+    (write-region (point-min) (point-max) file-path)))
+
+;exports active org mode buffer to a temp buffer with the html parsed body, adds some jinja template text, then applies our regex replace for our keywords, and finally saves this back to a new file 'original buffer name'.html
+(defun my-html-export ()
+  (interactive)
+  (let* ((export-file (concat (file-name-sans-extension (buffer-file-name)) ".html"))
+         (html-content-buffer (org-export-to-buffer 'html "*My HTML Export*" nil nil t t))
+         (html-content (with-current-buffer html-content-buffer (buffer-string))))
+    (with-temp-buffer
+      (insert "{% extends 'layout.html' %}\n{% block title %}\n<title>Title</title>\n{% endblock title %}\n\n{% block content %}\n<div class='article-title'><h1>Title</h1></div>\n<div class='article'>\n\n")
+      (insert html-content)
+      (insert "\n</div>\n{% endblock content %}")
+      (write-region (point-min) (point-max) export-file))
+    (my-replace-custom-tags-in-html-file export-file)
+    (kill-buffer html-content-buffer)
+    (delete-other-windows)
+    (find-file export-file))
+  (message "Org buffer exported to HTML!"))
+
+;; Your existing key bindings (unchanged)
+(my-leader
+ "" '(:ignore t :which-key "Custom leader key with SPC")
+ "." 'counsel-find-file
+ "r" 'counsel-projectile-rg
+ "b" '(hydra-buffers/body :which-key "Manage Buffers")
+ "s" '(hydra-scale-text/body :which-key "Scale Text Size")
+ "y" '(org-custom-html-highlight :which-key "Highlight website tags in org mode")
+ "e" 'my-html-export)
+
+
 ;makes emacs look pretty
 (use-package doom-themes
   :config
@@ -265,3 +328,17 @@
 	doom-themes-enable-italic t)
   (doom-themes-org-config))
 (load-theme 'doom-tomorrow-night t)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(golsp go-mode tree-sitter-langs tree-sitter which-key visual-fill-column use-package pyvenv python-mode org-roam-ui org-pdftools magit lsp-ivy hydra helpful general evil-nerd-commenter doom-themes counsel-projectile company-box all-the-icons)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
